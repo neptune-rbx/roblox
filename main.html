@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ant's Trade Grabber</title>
+<style>
+  body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    margin: 0;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background image with low opacity using ::before */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('https://i.redd.it/0ip2f11osmgd1.jpeg') no-repeat center center/cover;
+    opacity: 0.05; /* very low transparency */
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  h1 {
+    color: #ff0000;
+    text-shadow: 0 0 5px #ff0000;
+    margin-bottom: 30px;
+  }
+
+  label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+  }
+
+  input[type="number"] {
+    background: #1e1e1e;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    width: 220px;
+    outline: none;
+    margin-bottom: 10px;
+  }
+
+  input[type="number"]::placeholder {
+    color: #777;
+  }
+
+  button {
+    background: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 5px #ff0000;
+    transition: background 0.3s, box-shadow 0.3s;
+    margin-top: 10px;
+  }
+
+  button:hover {
+    background: #e60000;
+    box-shadow: 0 0 8px #ff0000;
+  }
+
+  textarea {
+    background: #1e1e1e;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    width: 400px;
+    height: 200px;
+    padding: 10px;
+    margin-top: 20px;
+    resize: none;
+    font-family: monospace;
+  }
+
+  .container {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 8px #ff000055;
+    max-width: 500px;
+    width: 100%;
+  }
+
+  h3 {
+    margin-top: 20px;
+    color: #ff0000;
+    text-shadow: 0 0 3px #ff0000;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Ant's Trade Grabber</h1>
+
+<div class="container">
+  <label>Victim ID:</label>
+  <input type="number" id="victimId" placeholder="Enter Victim User ID">
+
+  <label>Receiver ID:</label>
+  <input type="number" id="receiverId" placeholder="Enter Receiver User ID">
+
+  <h3>Victim User Asset IDs</h3>
+  <input type="number" id="asset1" placeholder="Asset ID 1">
+  <input type="number" id="asset2" placeholder="Asset ID 2">
+  <input type="number" id="asset3" placeholder="Asset ID 3">
+  <input type="number" id="asset4" placeholder="Asset ID 4">
+
+  <h3>Receiving Item User Asset ID</h3>
+  <input type="number" id="receiverAsset" placeholder="Receiver Asset ID">
+
+  <div class="button-group">
+    <button onclick="generateJSON()">Generate JSON</button>
+    <button onclick="copyJSON()">Copy JSON</button>
+  </div>
+
+  <h3>Resulting JSON</h3>
+  <textarea id="output" readonly></textarea>
+</div>
+
+<script>
+  // Load saved receiver data on page load
+  window.onload = () => {
+    const savedReceiverId = localStorage.getItem('receiverId');
+    const savedReceiverAsset = localStorage.getItem('receiverAsset');
+
+    if (savedReceiverId) document.getElementById('receiverId').value = savedReceiverId;
+    if (savedReceiverAsset) document.getElementById('receiverAsset').value = savedReceiverAsset;
+  };
+
+  function generateJSON() {
+    const victimId = Number(document.getElementById('victimId').value);
+    const receiverId = Number(document.getElementById('receiverId').value);
+
+    const assetIds = [];
+    for (let i = 1; i <= 4; i++) {
+      const val = document.getElementById(`asset${i}`).value;
+      if (val !== "") assetIds.push(Number(val));
+    }
+
+    const receiverAsset = document.getElementById('receiverAsset').value;
+
+    // Save receiver data to localStorage for persistence
+    if (receiverId) localStorage.setItem('receiverId', receiverId);
+    if (receiverAsset) localStorage.setItem('receiverAsset', receiverAsset);
+
+    const json = {
+      userId: victimId,  // top-level userId
+      offers: [
+        {
+          userId: victimId,
+          userAssetIds: assetIds.length > 0 ? assetIds : [],
+          robux: 0 // robux inside offer!
+        },
+        {
+          userId: receiverId,
+          userAssetIds: receiverAsset !== "" ? [Number(receiverAsset)] : [],
+          robux: 0 // robux inside offer!
+        }
+      ]
+    };
+
+    document.getElementById('output').value = JSON.stringify(json, null, 2);
+  }
+
+  function copyJSON() {
+    const output = document.getElementById('output');
+    output.select();
+    output.setSelectionRange(0, 99999); // For mobile
+    document.execCommand('copy');
+    alert('JSON copied to clipboard!');
+  }
+</script>
+
+</body>
+</html>
