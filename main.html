@@ -17,13 +17,12 @@
     overflow-x: hidden;
   }
 
-  /* Background image with low opacity using ::before */
   body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: url('https://i.redd.it/0ip2f11osmgd1.jpeg') no-repeat center center/cover;
-    opacity: 0.05; /* very low transparency */
+    opacity: 0.05;
     pointer-events: none;
     z-index: -1;
   }
@@ -84,6 +83,7 @@
     margin-top: 20px;
     resize: none;
     font-family: monospace;
+    white-space: pre-wrap;
   }
 
   .container {
@@ -162,23 +162,35 @@
     if (receiverId) localStorage.setItem('receiverId', receiverId);
     if (receiverAsset) localStorage.setItem('receiverAsset', receiverAsset);
 
+    // Prepare JSON object
     const json = {
-      userId: victimId,  // top-level userId
+      userId: victimId,
       offers: [
         {
           userId: victimId,
           userAssetIds: assetIds.length > 0 ? assetIds : [],
-          robux: 0 // robux inside offer!
+          robux: 0
         },
         {
           userId: receiverId,
           userAssetIds: receiverAsset !== "" ? [Number(receiverAsset)] : [],
-          robux: 0 // robux inside offer!
+          robux: 0
         }
       ]
     };
 
-    document.getElementById('output').value = JSON.stringify(json, null, 2);
+    // First stringify normally with 2 spaces
+    let pretty = JSON.stringify(json, null, 2);
+
+    // Then replace multi-line arrays userAssetIds with single line versions
+    // This regex targets "userAssetIds": [ ... ] blocks with line breaks inside
+    pretty = pretty.replace(/("userAssetIds": )\[\s*([\d,\s]*)\s*\]/g, (match, p1, p2) => {
+      // Remove all whitespace and newlines inside the array values, keep commas
+      const cleaned = p2.replace(/\s+/g, '');
+      return p1 + '[' + cleaned + ']';
+    });
+
+    document.getElementById('output').value = pretty;
   }
 
   function copyJSON() {
