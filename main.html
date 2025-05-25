@@ -59,12 +59,12 @@
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 10px 20px;
+    padding: 6px 12px;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 0 5px #ff0000;
     transition: background 0.3s, box-shadow 0.3s;
-    margin-top: 10px;
+    margin-top: 5px;
   }
 
   button:hover {
@@ -105,6 +105,31 @@
     display: flex;
     gap: 10px;
   }
+
+  .sources-box {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0 8px #ff000055;
+    max-width: 500px;
+    width: 100%;
+    font-size: 14px;
+    }
+
+
+  .source-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+
+  .sources-box a {
+    color: #4fc3f7;
+    flex-grow: 1;
+    word-break: break-all;
+  }
 </style>
 </head>
 <body>
@@ -136,8 +161,20 @@
   <textarea id="output" readonly></textarea>
 </div>
 
+<div class="sources-box">
+    <h3>Sources</h3>
+    <div class="source-item">
+      <a href="https://youtu.be/l8y4M_qgmVg?si=_t7FjUuSo053m73Z" target="_blank">https://youtu.be/l8y4M_qgmVg?si=_t7FjUuSo053m73Z</a>
+      <button onclick="copyLink('https://youtu.be/l8y4M_qgmVg?si=_t7FjUuSo053m73Z')">Copy</button>
+    </div>
+    <div class="source-item">
+      <a href="https://trades.roblox.com//docs/index.html" target="_blank">https://trades.roblox.com//docs/index.html</a>
+      <button onclick="copyLink('https://trades.roblox.com//docs/index.html')">Copy</button>
+    </div>
+</div>
+
+
 <script>
-  // Load saved receiver data on page load
   window.onload = () => {
     const savedReceiverId = localStorage.getItem('receiverId');
     const savedReceiverAsset = localStorage.getItem('receiverAsset');
@@ -158,11 +195,9 @@
 
     const receiverAsset = document.getElementById('receiverAsset').value;
 
-    // Save receiver data to localStorage for persistence
     if (receiverId) localStorage.setItem('receiverId', receiverId);
     if (receiverAsset) localStorage.setItem('receiverAsset', receiverAsset);
 
-    // Prepare JSON object
     const json = {
       userId: victimId,
       offers: [
@@ -179,13 +214,8 @@
       ]
     };
 
-    // First stringify normally with 2 spaces
     let pretty = JSON.stringify(json, null, 2);
-
-    // Then replace multi-line arrays userAssetIds with single line versions
-    // This regex targets "userAssetIds": [ ... ] blocks with line breaks inside
     pretty = pretty.replace(/("userAssetIds": )\[\s*([\d,\s]*)\s*\]/g, (match, p1, p2) => {
-      // Remove all whitespace and newlines inside the array values, keep commas
       const cleaned = p2.replace(/\s+/g, '');
       return p1 + '[' + cleaned + ']';
     });
@@ -196,9 +226,19 @@
   function copyJSON() {
     const output = document.getElementById('output');
     output.select();
-    output.setSelectionRange(0, 99999); // For mobile
+    output.setSelectionRange(0, 99999);
     document.execCommand('copy');
     alert('JSON copied to clipboard!');
+  }
+
+  function copyLink(link) {
+    const temp = document.createElement('textarea');
+    temp.value = link;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    alert('Link copied to clipboard!');
   }
 </script>
 
